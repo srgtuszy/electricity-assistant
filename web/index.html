@@ -29,6 +29,29 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
+    import { getFunctions } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrOboisE3bcKQFdtcLXAXbK-UdTFwLI_o",
+      authDomain: "electricity-assistant-fb2f7.firebaseapp.com",
+      projectId: "electricity-assistant-fb2f7",
+      storageBucket: "electricity-assistant-fb2f7.appspot.com",
+      messagingSenderId: "278136132490",
+      appId: "1:278136132490:web:a88532c443f237b005ee73",
+      measurementId: "G-6N4TEWVZKY"
+  };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const functions = getFunctions(app);
+  </script>
+
   <title>electricity_assistant</title>
   <link rel="manifest" href="manifest.json">
 </head>

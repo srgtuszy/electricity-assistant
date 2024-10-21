@@ -25,6 +25,7 @@ Future<void> main() async {
     FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
   }
 
+  FirebaseFunctions.instance;
   FirebaseFirestore.instance.databaseId = "measurements";
   runApp(const ElectricityAssistantApp());
 }
@@ -125,8 +126,8 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable('generateTips');
-      final HttpsCallableResult result = await callable();
+          FirebaseFunctions.instance.httpsCallable('triggerGenerateTips');
+      final result = await callable.call();
       print('Function result: ${result.data}');
       _showSuccessSnackBar('Tips generated successfully');
     } catch (e) {
