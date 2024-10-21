@@ -7,6 +7,7 @@ import 'package:electricity_assistant/firebase_options.dart';
 import 'package:electricity_assistant/measurement_store.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,18 @@ class _HomePageState extends State<HomePage> {
   bool isGenerating = false;
   final MeasurementStore _measurementStore = MeasurementStore();
 
+  void _showErrorToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -79,6 +92,7 @@ class _HomePageState extends State<HomePage> {
       await _measurementStore.addMeasurement(kwh);
     } catch (e) {
       print('Error adding data to Firestore: $e');
+      _showErrorToast('Error adding data to Firestore');
     }
   }
 
@@ -87,6 +101,7 @@ class _HomePageState extends State<HomePage> {
       await _measurementStore.clearMeasurements();
     } catch (e) {
       print('Error clearing Firestore data: $e');
+      _showErrorToast('Error clearing Firestore data');
     }
   }
 
