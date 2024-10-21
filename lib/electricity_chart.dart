@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-/// [ElectricityChart] displays real-time electricity usage measurements.
+/// [ElectricityChart] displays real-time electricity usage measurements from Firestore.
 class ElectricityChart extends StatefulWidget {
   const ElectricityChart({super.key});
 
@@ -14,25 +15,41 @@ class ElectricityChart extends StatefulWidget {
 
 class _ElectricityChartState extends State<ElectricityChart> {
   final List<FlSpot> _spots = [];
-  StreamSubscription<double>? _subscription;
+  StreamSubscription<QuerySnapshot>? _subscription;
   final int _maxSpots = 20;
 
   @override
   void initState() {
     super.initState();
-    // Start the stream of random measurements.
-    _subscription = _randomMeasurementStream().listen((measurement) {
-      setState(() {
-        // Update the spots list with the new measurement.
-        final x = _spots.isNotEmpty ? _spots.last.x + 1 : 0;
-        _spots.add(FlSpot(x.toDouble(), measurement));
-
-        // Keep only the last [_maxSpots] measurements.
-        if (_spots.length > _maxSpots) {
-          _spots.removeAt(0);
-        }
-      });
-    });
+    _subscription = FirebaseFirestore.instance
+        .collection('electricity')
+        .orderBy('date', descending: false)
+        .limitToLast(_maxSpots)
+        .snapshots()
+        .listen(
+      (snapshot) {
+        setState(() {
+          _spots.clear();
+          for (var doc in snapshot.docs) {
+            final data = doc.data();
+            if (data != null &&
+                data['date'] is Timestamp &&
+                data['kwh'] is num) {
+              final timestamp = (data['date'] as Timestamp).toDate();
+              final kwh = data['kwh'] as num;
+              final x = timestamp.millisecondsSinceEpoch.toDouble();
+              final y = kwh.toDouble();
+              _spots.add(FlSpot(x, y));
+            } else {
+              print('Invalid data format in Firestore document: $data');
+            }
+          }
+        });
+      },
+      onError: (error) {
+        print('Error fetching data from Firestore: $error');
+      },
+    );
   }
 
   @override
@@ -41,18 +58,12 @@ class _ElectricityChartState extends State<ElectricityChart> {
     super.dispose();
   }
 
-  /// Simulates a stream of random electricity usage measurements.
-  Stream<double> _randomMeasurementStream() async* {
-    final random = Random();
-    while (true) {
-      await Future.delayed(const Duration(seconds: 1));
-      // Simulate measurements between 50 and 200 kilowatts.
-      yield 50 + random.nextDouble() * 150;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (_spots.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return LineChart(
       LineChartData(
         backgroundColor: Colors.black12,
@@ -60,8 +71,12 @@ class _ElectricityChartState extends State<ElectricityChart> {
           touchTooltipData: LineTouchTooltipData(
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
+                final date =
+                    DateTime.fromMillisecondsSinceEpoch(spot.x.toInt());
+                final formattedDate =
+                    '${date.hour}:${date.minute}:${date.second}';
                 return LineTooltipItem(
-                  'Time: ${spot.x.toInt()}s\nUsage: ${spot.y.toStringAsFixed(2)} kW',
+                  'Time: $formattedDate\nUsage: ${spot.y.toStringAsFixed(2)} kWh',
                   const TextStyle(color: Colors.white),
                 );
               }).toList();
@@ -91,10 +106,9 @@ class _ElectricityChartState extends State<ElectricityChart> {
           ),
         ],
         minY: 0,
-        maxY: 220,
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
-            axisNameWidget: const Text('Usage (kW)',
+            axisNameWidget: const Text('Usage (kWh)',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             sideTitles: SideTitles(
               showTitles: true,
@@ -108,15 +122,21 @@ class _ElectricityChartState extends State<ElectricityChart> {
             ),
           ),
           bottomTitles: AxisTitles(
-            axisNameWidget: const Text('Time (s)',
+            axisNameWidget: const Text('Time',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             sideTitles: SideTitles(
               showTitles: true,
-              interval: 5,
+              interval: _calculateTimeInterval(),
               getTitlesWidget: (value, meta) {
-                return Text('${value.toInt()}',
-                    style:
-                        const TextStyle(color: Colors.black54, fontSize: 12));
+                final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                final formattedTime =
+                    '${date.hour}:${date.minute}:${date.second}';
+                return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  child: Text(formattedTime,
+                      style:
+                          const TextStyle(color: Colors.black54, fontSize: 10)),
+                );
               },
             ),
           ),
@@ -129,5 +149,15 @@ class _ElectricityChartState extends State<ElectricityChart> {
         ),
       ),
     );
+  }
+
+  double _calculateTimeInterval() {
+    if (_spots.length < 2) {
+      return 1;
+    }
+    final start = _spots.first.x;
+    final end = _spots.last.x;
+    final interval = (end - start) / 5;
+    return interval;
   }
 }
