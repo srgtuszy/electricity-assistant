@@ -6,6 +6,7 @@ import 'package:electricity_assistant/electricity_chart.dart';
 import 'package:electricity_assistant/firebase_options.dart';
 import 'package:electricity_assistant/measurement_store.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -14,6 +15,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Configure Firebase to use the emulator
+  if (kDebugMode) {
+    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8081);
+  }
+
   FirebaseFirestore.instance.databaseId = "measurements";
   runApp(const ElectricityAssistantApp());
 }
