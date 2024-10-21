@@ -1,3 +1,4 @@
+import 'package:electricity_assistant/electricity_chart.dart';
 import 'package:electricity_assistant/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -38,48 +39,7 @@ class HomePage extends StatelessWidget {
       body: Center(
         child: SizedBox(
           height: 300,
-          child: LineChart(
-            LineChartData(
-              lineBarsData: [
-                LineChartBarData(
-                  spots: [
-                    const FlSpot(0, 1),
-                    const FlSpot(1, 3),
-                    const FlSpot(2, 10),
-                    const FlSpot(3, 7),
-                    const FlSpot(4, 12),
-                    const FlSpot(5, 13),
-                    const FlSpot(6, 17),
-                    const FlSpot(7, 15),
-                    const FlSpot(8, 20)
-                  ],
-                  isCurved: true,
-                  color: Colors.blue,
-                  barWidth: 2,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    color: Colors.blue.withOpacity(0.3),
-                  ),
-                ),
-              ],
-              minY: 0,
-              titlesData: const FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                rightTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-              ),
-            ),
-          ),
+          child: ElectricityChart(),
         ),
       ),
     );
