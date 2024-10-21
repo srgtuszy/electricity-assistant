@@ -86,6 +86,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _clearFirestoreData() async {
+    try {
+      final collection = FirebaseFirestore.instance.collection('electricity');
+      final snapshot = await collection.get();
+      for (var doc in snapshot.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      print('Error clearing Firestore data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +117,11 @@ class _HomePageState extends State<HomePage> {
             child: Text(isGenerating
                 ? 'Stop Generating Data'
                 : 'Start Generating Data'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _clearFirestoreData,
+            child: const Text('Clear Firestore Data'),
           ),
         ],
       ),
