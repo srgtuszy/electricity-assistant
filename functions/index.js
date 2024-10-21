@@ -13,8 +13,11 @@ exports.generateTips = functions.https.onRequest(async (req, res) => {
   const measurements = await fetchMeasurements();
   console.log(`Fetched ${measurements.length} measurements`);
   const tips = await generateTips(measurements);
+  tips.forEach(async (tip) => {
+    await db.collection("tips").add(tip);
+  });
   console.log(`Generated ${tips.length} tips`);
-  res.send(tips);
+  res.send({data: tips});
 });
 
 async function fetchMeasurements() {
