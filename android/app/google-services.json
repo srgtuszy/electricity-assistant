@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "278136132490",
+    "project_id": "electricity-assistant-fb2f7",
+    "storage_bucket": "electricity-assistant-fb2f7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278136132490:android:813fc535017fc49405ee73",
+        "android_client_info": {
+          "package_name": "pl.intenty.an"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZhbBpEKdDbJr4dfTyApeDbQACBk4pJJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
