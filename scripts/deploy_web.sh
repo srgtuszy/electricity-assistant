@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build the Flutter web app
-flutter build web
+flutter build web --web-renderer html --release
 
 # Move the output to public
 mv build/web/* public/
