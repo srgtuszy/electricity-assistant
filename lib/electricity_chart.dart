@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:electricity_assistant/measurement_store.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -15,34 +16,19 @@ class ElectricityChart extends StatefulWidget {
 
 class _ElectricityChartState extends State<ElectricityChart> {
   final List<FlSpot> _spots = [];
-  StreamSubscription<QuerySnapshot>? _subscription;
-  final int _maxSpots = 20;
+  final MeasurementStore _measurementStore = MeasurementStore();
 
   @override
   void initState() {
     super.initState();
-    _subscription = FirebaseFirestore.instance
-        .collection('electricity')
-        .orderBy('date', descending: false)
-        .limitToLast(_maxSpots)
-        .snapshots()
-        .listen(
-      (snapshot) {
+    _measurementStore.streamMeasurements().listen(
+      (measurements) {
         setState(() {
           _spots.clear();
-          for (var doc in snapshot.docs) {
-            final data = doc.data();
-            if (data != null &&
-                data['date'] is Timestamp &&
-                data['kwh'] is num) {
-              final timestamp = (data['date'] as Timestamp).toDate();
-              final kwh = data['kwh'] as num;
-              final x = timestamp.millisecondsSinceEpoch.toDouble();
-              final y = kwh.toDouble();
-              _spots.add(FlSpot(x, y));
-            } else {
-              print('Invalid data format in Firestore document: $data');
-            }
+          for (var measurement in measurements) {
+            final x = measurement.date.millisecondsSinceEpoch.toDouble();
+            final y = measurement.kwh.toDouble();
+            _spots.add(FlSpot(x, y));
           }
         });
       },
@@ -50,12 +36,6 @@ class _ElectricityChartState extends State<ElectricityChart> {
         print('Error fetching data from Firestore: $error');
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
   }
 
   @override

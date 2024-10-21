@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:electricity_assistant/electricity_chart.dart';
 import 'package:electricity_assistant/firebase_options.dart';
+import 'package:electricity_assistant/measurement_store.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -43,6 +44,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Timer? _timer;
   bool isGenerating = false;
+  final MeasurementStore _measurementStore = MeasurementStore();
 
   @override
   void dispose() {
@@ -72,15 +74,9 @@ class _HomePageState extends State<HomePage> {
     final random = Random();
     final kwh =
         50 + random.nextDouble() * 150; // Random value between 50 and 200 kWh
-    final timestamp = DateTime.now();
 
     try {
-      final doc =
-          await FirebaseFirestore.instance.collection('electricity').add({
-        'kwh': kwh,
-        'date': timestamp,
-      });
-      print('Added document with ID: ${doc.id}');
+      await _measurementStore.addMeasurement(kwh);
     } catch (e) {
       print('Error adding data to Firestore: $e');
     }
@@ -88,11 +84,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _clearFirestoreData() async {
     try {
-      final collection = FirebaseFirestore.instance.collection('electricity');
-      final snapshot = await collection.get();
-      for (var doc in snapshot.docs) {
-        await doc.reference.delete();
-      }
+      await _measurementStore.clearMeasurements();
     } catch (e) {
       print('Error clearing Firestore data: $e');
     }
