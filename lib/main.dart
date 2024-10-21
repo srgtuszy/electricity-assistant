@@ -2,7 +2,6 @@ import 'package:electricity_assistant/electricity_chart.dart';
 import 'package:electricity_assistant/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 Future<void> main() async {
   await Firebase.initializeApp(
@@ -36,7 +35,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Home Page'),
       ),
-      body: Center(
+      body: const Center(
         child: SizedBox(
           height: 300,
           child: ElectricityChart(),

@@ -9,7 +9,7 @@ class ElectricityChart extends StatefulWidget {
   const ElectricityChart({super.key});
 
   @override
-  _ElectricityChartState createState() => _ElectricityChartState();
+  State<ElectricityChart> createState() => _ElectricityChartState();
 }
 
 class _ElectricityChartState extends State<ElectricityChart> {
@@ -68,7 +68,7 @@ class _ElectricityChartState extends State<ElectricityChart> {
             },
           ),
         ),
-        gridData: FlGridData(show: true, drawVerticalLine: false),
+        gridData: const FlGridData(show: true, drawVerticalLine: false),
         lineBarsData: [
           LineChartBarData(
             spots: _spots,
@@ -120,10 +120,10 @@ class _ElectricityChartState extends State<ElectricityChart> {
               },
             ),
           ),
-          rightTitles: AxisTitles(
+          rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          topTitles: AxisTitles(
+          topTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
         ),
