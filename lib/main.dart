@@ -28,18 +28,50 @@ Future<void> main() async {
   runApp(const ElectricityAssistantApp());
 }
 
-class ElectricityAssistantApp extends StatelessWidget {
+class ElectricityAssistantApp extends StatefulWidget {
   const ElectricityAssistantApp({super.key});
 
   @override
+  State<StatefulWidget> createState() {
+    return _ElectricityAssistantAppState();
+  }
+}
+
+class _ElectricityAssistantAppState extends State<ElectricityAssistantApp> {
+  bool? _isDarkMode;
+
+  bool get isDarkMode => _isDarkMode ?? false;
+
+  void _toggleDarkMode() {
+    setState(() {
+      if (_isDarkMode == null) {
+        _isDarkMode = false;
+      } else {
+        _isDarkMode = !_isDarkMode!;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isDarkMode == null) {
+      final brightness = MediaQuery.of(context).platformBrightness;
+      _isDarkMode = brightness == Brightness.dark;
+    }
+
     return MaterialApp(
       title: 'Electricity Assistant',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Electricity Assistant'),
+          leading: IconButton(
+            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: _toggleDarkMode,
+          ),
+        ),
+        body: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }
@@ -160,88 +192,83 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Electricity Assistant'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 300,
-              child: ElectricityChart(),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _toggleDataGeneration,
-              child: Text(isGenerating
-                  ? 'Stop Generating Data'
-                  : 'Start Generating Data'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _clearFirestoreData,
-              child: const Text('Clear Firestore Data'),
-            ),
-            const SizedBox(height: 10),
-            const SizedBox(height: 10),
-            StatefulBuilder(
-              builder: (context, setState) {
-                return _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _triggerGenerateTips,
-                        child: const Text('Generate Tips'),
-                      );
-              },
-            ),
-            const SizedBox(height: 20),
-            StreamBuilder<List<Tip>>(
-              stream: _tipStore.streamTips(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final tips = snapshot.data!;
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      final double cardWidth = (constraints.maxWidth - 10) / 2;
-                      return GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: cardWidth / 100,
-                        ),
-                        itemCount: tips.length,
-                        itemBuilder: (context, index) {
-                          final tip = tips[index];
-                          return Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Center(
-                                child: Text(
-                                  tip.tip,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            height: 300,
+            child: ElectricityChart(),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _toggleDataGeneration,
+            child: Text(isGenerating
+                ? 'Stop Generating Data'
+                : 'Start Generating Data'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _clearFirestoreData,
+            child: const Text('Clear Firestore Data'),
+          ),
+          const SizedBox(height: 10),
+          const SizedBox(height: 10),
+          StatefulBuilder(
+            builder: (context, setState) {
+              return _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _triggerGenerateTips,
+                      child: const Text('Generate Tips'),
+                    );
+            },
+          ),
+          const SizedBox(height: 20),
+          StreamBuilder<List<Tip>>(
+            stream: _tipStore.streamTips(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final tips = snapshot.data!;
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double cardWidth = (constraints.maxWidth - 10) / 2;
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: cardWidth / 100,
+                      ),
+                      itemCount: tips.length,
+                      itemBuilder: (context, index) {
+                        final tip = tips[index];
+                        return Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Center(
+                              child: Text(
+                                tip.tip,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return const CircularProgressIndicator();
-                }
-              },
-            ),
-          ],
-        ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return const CircularProgressIndicator();
+              }
+            },
+          ),
+        ],
       ),
     );
   }
