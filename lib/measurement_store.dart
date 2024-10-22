@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:electricity_assistant/electricity_measurement.dart';
+import 'package:electricity_assistant/model/electricity_measurement.dart';
 
 class MeasurementStore {
   static const String collectionName = 'electricity';

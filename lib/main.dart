@@ -6,7 +6,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:electricity_assistant/electricity_chart.dart';
 import 'package:electricity_assistant/firebase_options.dart';
 import 'package:electricity_assistant/measurement_store.dart';
-import 'package:electricity_assistant/tip.dart';
+import 'package:electricity_assistant/model/tip.dart';
 import 'package:electricity_assistant/tip_store.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:electricity_assistant/tip.dart';
+import 'package:electricity_assistant/model/tip.dart';
 
 class TipStore {
   static const String collectionName = 'tips';
