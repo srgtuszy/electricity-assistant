@@ -230,34 +230,29 @@ class _HomePageState extends State<HomePage> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final tips = snapshot.data!;
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double cardWidth = (constraints.maxWidth - 10) / 2;
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: cardWidth / 100,
-                      ),
-                      itemCount: tips.length,
-                      itemBuilder: (context, index) {
-                        final tip = tips[index];
-                        return Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Center(
-                              child: Text(
-                                tip.tip,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
+                return GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                  ),
+                  itemCount: tips.length,
+                  itemBuilder: (context, index) {
+                    final tip = tips[index];
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Center(
+                          child: Text(
+                            tip.tip,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 14),
+                            maxLines: 6,
+                            overflow: TextOverflow.fade,
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     );
                   },
                 );
