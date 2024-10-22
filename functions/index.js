@@ -72,12 +72,13 @@ async function generateTips(measurements) {
   measurements that the user can take to reduce their electricity consumption. Reference those measurements in the tips. Mention if the energy usage is too high or too low.`;
   try {
     const result = await model.generateContent(prompt);
-    const generatedText = removeMarkdown(result.response.text());
+    const generatedText = result.response.text();
     console.log('Gemini response:', generatedText);
-    const tips = JSON.parse(generatedText);
-    return tips;
+
+    return JSON.parse(generatedText);
   } catch (error) {
     console.error('Error generating tips:', error);
+    
     return [];
   }
 }
@@ -109,53 +110,4 @@ async function collectionToTable(collectionRef) {
   });
 
   return tableString;
-}
-
-function removeMarkdown(text) {
-  // Remove horizontal rules
-  text = text.replace(/^(-\s*?|\*\s*?|_\s*?){3,}\s*$/gm, '');
-
-  // Remove headings
-  text = text.replace(/^(#{1,6})\s+(.+)$/gm, '$2');
-
-  // Remove bold and italic formatting
-  text = text.replace(/\*\*(.+?)\*\*/g, '$1');
-  text = text.replace(/__(.+?)__/g, '$1');
-  text = text.replace(/\*(.+?)\*/g, '$1');
-  text = text.replace(/_(.+?)_/g, '$1');
-
-  // Remove strikethrough formatting
-  text = text.replace(/~~(.+?)~~/g, '$1');
-
-  // Remove blockquotes
-  text = text.replace(/^\s*>\s*(.+)$/gm, '$1');
-
-  // Remove inline code
-  text = text.replace(/`(.+?)`/g, '$1');
-
-  // Remove code blocks
-  text = text.replace(/```(.+?)```/gs, '$1');
-
-  // Remove links
-  text = text.replace(/\[(.+?)\]\((.+?)\)/g, '$1');
-
-  // Remove images
-  text = text.replace(/!\[(.+?)\]\((.+?)\)/g, '');
-
-  // Remove unordered list bullets
-  text = text.replace(/^\s*[-*+]\s+/gm, '');
-
-  // Remove ordered list numbers
-  text = text.replace(/^\s*\d+\.\s+/gm, '');
-
-  // Remove GitHub-style code blocks with language identifiers
-  text = text.replace(/[a-z]*\n([\s\S]*?)/g, '$1');
-
-  // Remove backticks
-  text = text.replace(/`/g, '');
-
-  // Trim leading and trailing whitespace
-  text = text.trim();
-  
-  return text;
 }
