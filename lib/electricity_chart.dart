@@ -52,14 +52,14 @@ class _ElectricityChartState extends State<ElectricityChart> {
                 final formattedDate =
                     '${date.hour}:${date.minute}:${date.second}';
                 return LineTooltipItem(
-                  'Time: $formattedDate\nUsage: ${spot.y.toStringAsFixed(2)} kWh',
+                  'Time:  $formattedDate\nUsage:  ${spot.y.toStringAsFixed(2)} kWh',
                   const TextStyle(color: Colors.white),
                 );
               }).toList();
             },
           ),
         ),
-        gridData: const FlGridData(show: true, drawVerticalLine: false),
+        gridData: const FlGridData(show: true, drawVerticalLine: true),
         lineBarsData: [
           LineChartBarData(
             spots: _spots,
@@ -92,8 +92,7 @@ class _ElectricityChartState extends State<ElectricityChart> {
               reservedSize: 50,
               getTitlesWidget: (value, meta) {
                 return Text('${value.toInt()}',
-                    style:
-                        const TextStyle(color: Colors.black54, fontSize: 12));
+                    style: Theme.of(context).textTheme.labelSmall);
               },
             ),
           ),
@@ -110,8 +109,7 @@ class _ElectricityChartState extends State<ElectricityChart> {
                 return SideTitleWidget(
                   axisSide: meta.axisSide,
                   child: Text(formattedTime,
-                      style:
-                          const TextStyle(color: Colors.black54, fontSize: 10)),
+                      style: Theme.of(context).textTheme.labelSmall),
                 );
               },
             ),

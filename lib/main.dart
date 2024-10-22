@@ -193,77 +193,81 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            height: 300,
-            child: ElectricityChart(),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _toggleDataGeneration,
-            child: Text(isGenerating
-                ? 'Stop Generating Data'
-                : 'Start Generating Data'),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: _clearFirestoreData,
-            child: const Text('Clear Firestore Data'),
-          ),
-          const SizedBox(height: 10),
-          const SizedBox(height: 10),
-          StatefulBuilder(
-            builder: (context, setState) {
-              return _isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _triggerGenerateTips,
-                      child: const Text('Generate Tips'),
-                    );
-            },
-          ),
-          const SizedBox(height: 20),
-          StreamBuilder<List<Tip>>(
-            stream: _tipStore.streamTips(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final tips = snapshot.data!;
-                return GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                  ),
-                  itemCount: tips.length,
-                  itemBuilder: (context, index) {
-                    final tip = tips[index];
-                    return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Center(
-                          child: Text(
-                            tip.tip,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 14),
-                            maxLines: 6,
-                            overflow: TextOverflow.fade,
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 300,
+              child: ElectricityChart(),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _toggleDataGeneration,
+              child: Text(isGenerating
+                  ? 'Stop Generating Data'
+                  : 'Start Generating Data'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _clearFirestoreData,
+              child: const Text('Clear Firestore Data'),
+            ),
+            const SizedBox(height: 10),
+            const SizedBox(height: 10),
+            StatefulBuilder(
+              builder: (context, setState) {
+                return _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _triggerGenerateTips,
+                        child: const Text('Generate Tips'),
+                      );
+              },
+            ),
+            const SizedBox(height: 20),
+            StreamBuilder<List<Tip>>(
+              stream: _tipStore.streamTips(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final tips = snapshot.data!;
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 200,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    itemCount: tips.length,
+                    itemBuilder: (context, index) {
+                      final tip = tips[index];
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              tip.tip,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 14),
+                              maxLines: 6,
+                              overflow: TextOverflow.fade,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return const CircularProgressIndicator();
-              }
-            },
-          ),
-        ],
+                      );
+                    },
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return const CircularProgressIndicator();
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
