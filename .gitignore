@@ -45,8 +45,9 @@ app.*.map.json
 # VSCode
 .vscode/
 
-# Firebase
+# Firebase web/hosting
 public/
+.firebase/
 
 # Env files
 .env.electricity-assistant-fb2f7
