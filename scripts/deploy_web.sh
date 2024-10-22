@@ -7,7 +7,7 @@ rm -rf public/*
 rm -rf build/web/*
 
 # Build the Flutter web app
-flutter build web --release
+flutter build web --web-renderer html --release
 
 # Move the output to public
 mv build/web/* public/
