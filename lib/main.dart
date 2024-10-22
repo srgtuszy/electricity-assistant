@@ -25,8 +25,6 @@ Future<void> main() async {
     FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
   }
 
-  FirebaseFunctions.instance;
-  FirebaseFirestore.instance.databaseId = "measurements";
   runApp(const ElectricityAssistantApp());
 }
 

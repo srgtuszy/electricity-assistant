@@ -1,16 +1,21 @@
-const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { onCall } = require("firebase-functions/v2/https");
-admin.initializeApp();
-
-const db = admin.firestore();
+const { defineSecret } = require('firebase-functions/params');
+const { onInit } = require('firebase-functions/v2/core');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const geminiKey = defineSecret('GEMINI_API_KEY');
+
+admin.initializeApp();
+const db = admin.firestore();
+
+let genAI, model;
+onInit(() => {
+  genAI = new GoogleGenerativeAI(geminiKey.value());
+  model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+});
 
 exports.triggerGenerateTips = onCall({cors: true}, async (req, res) => {
   console.log("Generating tips");
-  console.log(await db.collection("electricity").get());
   const measurements = await fetchMeasurements();
   console.log(`Fetched ${measurements.length} measurements`);
   const tips = await generateTips(measurements);
