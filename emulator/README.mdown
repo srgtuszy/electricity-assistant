@@ -1,0 +1,3 @@
+# Measurement Emulator
+
+This contains a simple utility to emulate electricity and water measurements. It lives in the same firebase instance as the rest of the app. In order to run it locally, just open `index.html`. If you'd like to deploy make sure you've got firebase CLI installed and run `deploy.sh` script.
