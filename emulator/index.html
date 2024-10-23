@@ -14,13 +14,16 @@
     <style>
         .page-content {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 64px); /* Subtract the height of the header */
         }
         .emulator-button {
             text-align: center;
-            margin-top: 50px;
+            margin-top: 20px;
         }
         .entity-list {
-            max-height: 200px;
+            flex: 1;
             overflow-y: auto;
             margin-top: 20px;
         }
@@ -39,6 +42,15 @@
         }
         .mdl-theme--dark .mdl-button--colored {
             background-color: #ff4081;
+        }
+        .mdl-theme--dark .mdl-button {
+            color: #fff;
+        }
+        .mdl-theme--dark .mdl-list {
+            background-color: #424242;
+        }
+        .mdl-theme--dark .mdl-list__item {
+            color: #fff;
         }
     </style>
 </head>
