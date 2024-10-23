@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Go Green Emulator</title>
+    <!-- Include Material Design Lite CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <!-- Include Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Include Material Design Lite JS -->
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <style>
+        .page-content {
+            padding: 20px;
+        }
+        .emulator-button {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .entity-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .spinner {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        /* Dark Mode Styles */
+        .mdl-theme--dark {
+            background-color: #303030;
+            color: #fff;
+        }
+        .mdl-theme--dark .mdl-layout__header {
+            background-color: #212121;
+        }
+        .mdl-theme--dark .mdl-button--colored {
+            background-color: #ff4081;
+        }
+    </style>
+</head>
+<body>
+    <!-- AppBar and Scaffold -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title">Go Green Emulator</span>
+                <!-- Dark Mode Switch -->
+                <div class="mdl-layout-spacer"></div>
+                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="dark-mode-switch">
+                    <input type="checkbox" id="dark-mode-switch" class="mdl-switch__input">
+                    <span class="mdl-switch__label">Dark Mode</span>
+                </label>
+            </div>
+        </header>
+        <main class="mdl-layout__content">
+            <div class="page-content">
+                <!-- Buttons -->
+                <div class="emulator-button">
+                    <button id="emulateButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                        Start Emulating
+                    </button>
+                    <button id="clearButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                        Clear Measurements
+                    </button>
+                </div>
+                <!-- Spinner -->
+                <div class="spinner">
+                    <div class="mdl-spinner mdl-js-spinner is-active"></div>
+                </div>
+                <!-- Entity List -->
+                <div class="entity-list">
+                    <ul id="entityList" class="mdl-list"></ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase and App Initialization -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrOboisE3bcKQFdtcLXAXbK-UdTFwLI_o",
+            authDomain: "electricity-assistant-fb2f7.firebaseapp.com",
+            projectId: "electricity-assistant-fb2f7",
+            storageBucket: "electricity-assistant-fb2f7.appspot.com",
+            messagingSenderId: "278136132490",
+            appId: "1:278136132490:web:689b9827428c3c5805ee73",
+            measurementId: "G-MPJ2TKMDV7"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+
+        // Emulation Logic
+        var isEmulating = false;
+        var emulateInterval;
+
+        var emulateButton = document.getElementById('emulateButton');
+        var clearButton = document.getElementById('clearButton');
+        var spinner = document.querySelector('.spinner');
+        var entityList = document.getElementById('entityList');
+
+        emulateButton.addEventListener('click', function() {
+            if (!isEmulating) {
+                startEmulating();
+            } else {
+                stopEmulating();
+            }
+        });
+
+        clearButton.addEventListener('click', function() {
+            clearMeasurements();
+        });
+
+        function getRandomValue(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function startEmulating() {
+            isEmulating = true;
+            emulateButton.textContent = 'Stop Emulating';
+            spinner.style.display = 'block';
+            entityList.innerHTML = ''; // Clear the entity list
+            emulateInterval = setInterval(function() {
+                // Iterate through all rooms
+                db.collection('rooms').get().then(function(querySnapshot) {
+                    querySnapshot.forEach(function(doc) {
+                        var roomId = doc.id;
+                        var roomRef = db.collection('rooms').doc(roomId);
+
+                        // Generate random measurements
+                        var measurements = [
+                            {
+                                type: 'electricity',
+                                value: getRandomValue(100, 1000), // Random electricity usage in Watts
+                                date: firebase.firestore.FieldValue.serverTimestamp()
+                            },
+                            {
+                                type: 'water',
+                                value: getRandomValue(1, 20), // Random water usage in Liters
+                                date: firebase.firestore.FieldValue.serverTimestamp()
+                            }
+                        ];
+
+                        measurements.forEach(function(measurement) {
+                            roomRef.collection('measurements').add(measurement)
+                            .then(function(docRef) {
+                                console.log('Measurement added with ID: ', docRef.id);
+                                // Add the entity ID to the list
+                                var listItem = document.createElement('li');
+                                listItem.className = 'mdl-list__item';
+                                listItem.textContent = docRef.id;
+                                entityList.appendChild(listItem);
+                                // Scroll to the latest record
+                                entityList.scrollTop = entityList.scrollHeight;
+                            })
+                            .catch(function(error) {
+                                console.error('Error adding measurement: ', error);
+                            });
+                        });
+                    });
+                }).catch(function(error) {
+                    console.error('Error getting rooms: ', error);
+                });
+            }, 1000);
+        }
+
+        function stopEmulating() {
+            isEmulating = false;
+            emulateButton.textContent = 'Start Emulating';
+            spinner.style.display = 'none';
+            clearInterval(emulateInterval);
+        }
+
+        function clearMeasurements() {
+            // Iterate through all rooms
+            db.collection('rooms').get().then(function(querySnapshot) {
+                querySnapshot.forEach(function(doc) {
+                    var roomId = doc.id;
+                    var roomRef = db.collection('rooms').doc(roomId);
+
+                    // Delete all measurements in the room
+                    roomRef.collection('measurements').get().then(function(measurementsSnapshot) {
+                        measurementsSnapshot.forEach(function(measurementDoc) {
+                            measurementDoc.ref.delete();
+                        });
+                    });
+                });
+                // Clear the entity list
+                entityList.innerHTML = '';
+            }).catch(function(error) {
+                console.error('Error getting rooms: ', error);
+            });
+        }
+
+        // Dark Mode Toggle
+        var darkModeSwitch = document.getElementById('dark-mode-switch');
+        darkModeSwitch.addEventListener('change', function() {
+            document.body.classList.toggle('mdl-theme--dark');
+        });
+    </script>
+</body>
+</html>

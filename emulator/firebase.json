@@ -1,0 +1,6 @@
+{
+  "hosting": {
+    "site": "green-go-emulator",
+    "public": "public"
+  }
+}
