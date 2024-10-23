@@ -39,30 +39,16 @@ onInit(() => {
 
 exports.triggerGenerateTips = onCall({cors: true}, async (data, context) => {
   console.log("Generating tips");
-  const measurements = await fetchMeasurements();
-  console.log(`Fetched ${measurements.length} measurements`);
-  const tips = await generateTips(measurements);
-  
+  const tips = await generateTips();
   const tipsCollection = db.collection("tips");
   const tipsPromises = tips.map(tip => tipsCollection.add(tip));
   await Promise.all(tipsPromises);
-
   console.log(`Generated ${tips.length} tips`);
+  
   return {data: tips};
 });
 
-async function fetchMeasurements() {
-  return await db.collection("electricity")
-    .orderBy("date", "desc")
-    .get()
-    .then((snapshot) => snapshot.docs.map((doc) => {
-      const data = doc.data();
-      data.date = data.date.toDate().toLocaleString();
-      return data;
-    }));
-}
-
-async function generateTips(measurements) {
+async function generateTips() {
   console.log('Generating tips using Gemini...');  
   const table = await collectionToTable(db.collection("electricity"));
   console.log(table);
