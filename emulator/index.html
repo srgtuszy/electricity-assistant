@@ -79,6 +79,12 @@
                     <button id="clearButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
                         Clear Measurements
                     </button>
+                    <button id="addRoomsButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                        Add Rooms
+                    </button>
+                    <button id="removeRoomsButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                        Remove All Rooms
+                    </button>
                 </div>
                 <!-- Spinner -->
                 <div class="spinner">
@@ -206,6 +212,58 @@
                 entityList.innerHTML = '';
             }).catch(function(error) {
                 console.error('Error getting rooms: ', error);
+            });
+        }
+
+        var addRoomsButton = document.getElementById('addRoomsButton');
+        var removeRoomsButton = document.getElementById('removeRoomsButton');
+
+        addRoomsButton.addEventListener('click', function() {
+            addRandomRooms(50);
+        });
+
+        removeRoomsButton.addEventListener('click', function() {
+            removeAllRooms();
+        });
+
+        function getRandomLastName() {
+            var lastNames = [
+                'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller',
+                'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez',
+                'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+                'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark',
+                'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King',
+                'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green',
+                'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell'
+            ];
+            var randomIndex = Math.floor(Math.random() * lastNames.length);
+            return lastNames[randomIndex];
+        }
+
+        function addRandomRooms(count) {
+            for (var i = 0; i < count; i++) {
+                var room = {
+                    isOccupied: false,
+                    roomNumber: i + 1,
+                    lastName: getRandomLastName()
+                };
+                db.collection('rooms').add(room)
+                .then(function(docRef) {
+                    console.log('Room added with ID: ', docRef.id);
+                })
+                .catch(function(error) {
+                    console.error('Error adding room: ', error);
+                });
+            }
+        }
+
+        function removeAllRooms() {
+            db.collection('rooms').get().then(function(querySnapshot) {
+                querySnapshot.forEach(function(doc) {
+                    doc.ref.delete();
+                });
+            }).catch(function(error) {
+                console.error('Error removing rooms: ', error);
             });
         }
 
