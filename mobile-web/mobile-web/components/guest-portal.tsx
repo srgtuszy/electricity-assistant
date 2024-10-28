@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Thermometer, Bed, Utensils, X, Check, Wifi, Key } from "lucide-react"
 import Confetti from 'react-confetti'
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import {
   Dialog,
@@ -76,23 +76,38 @@ export function GuestPortal() {
     }
   }
 
-  const handleAction = (id: number, action: 'dismiss' | 'accept') => {
+  const handleAction = async (id: number, action: 'dismiss' | 'accept') => {
     if (action === 'accept') {
-      setCards(cards.filter(card => card.id !== id))
-      setShowConfetti(true)
-      setTimeout(() => setShowConfetti(false), 5000)
+      try {
+        const cardToUpdate = cards.find(card => card.id === id);
+        if (cardToUpdate) {
+          const roomNumberInt = parseInt(roomNumber, 10);
+          const tipsRef = collection(firestore, 'tips');
+          const q = query(tipsRef, where('roomNumber', '==', roomNumberInt), where('tip', '==', cardToUpdate.content));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const docRef = doc(firestore, 'tips', querySnapshot.docs[0].id);
+            await updateDoc(docRef, { done: true });
+          }
+        }
+        setCards(cards.filter(card => card.id !== id));
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+      } catch (error) {
+        console.error('Error updating tip as done:', error);
+      }
     } else {
-      setCurrentCardId(id)
-      setShowFeedback(true)
+      setCurrentCardId(id);
+      setShowFeedback(true);
     }
-  }
+  };
 
   const handleFeedback = (reason: string) => {
     console.log(`Card ${currentCardId} dismissed. Reason: ${reason}`)
-    setCards(cards.filter(card => card.id !== currentCardId))
-    setShowFeedback(false)
-    setCurrentCardId(null)
-  }
+    setCards(cards.filter(card => card.id !== currentCardId));
+    setShowFeedback(false);
+    setCurrentCardId(null);
+  };
 
   if (!isAuthenticated) {
     return (
