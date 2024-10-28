@@ -1,6 +1,10 @@
 import asyncio
 from bleak import BleakClient, BleakScanner
 from govee_packet import GoveePacket
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+import os
 
 SERVICE_UUID = "00010203-0405-0607-0809-0a0b0c0d1910"
 WRITE_CHAR_UUID = "00010203-0405-0607-0809-0a0b0c0d2b11"
@@ -44,29 +48,52 @@ async def set_brightness(client, brightness):
     except ValueError as e:
         print(f"Error setting brightness: {e}")
 
+async def execute_commands_and_set_color(client):
+    for i, command in enumerate(ALL_GREEN_COMMANDS, 1):
+        print(f"Sending ALL_GREEN command {i} of {len(ALL_GREEN_COMMANDS)}")
+        await client.write_gatt_char(WRITE_CHAR_UUID, bytes.fromhex(command), response=True)
+    await asyncio.sleep(3)
+    print("Setting color to green")
+    await set_light_color(client, (0, 255, 0))  # RGB values for green
 
 async def main():
+    # Get the path to the service account JSON from the environment variable
+    service_account_path = os.environ.get('FIREBASE_SERVICE_ACCOUNT_PATH')
+    if not service_account_path or not os.path.isfile(service_account_path):
+        print("Firebase service account JSON file not found or environment variable not set.")
+        return
+
+    # Initialize Firebase app and Firestore client
+    cred = credentials.Certificate(service_account_path)
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+
     # Find devices
     devices = await find_govee_devices()
     if not devices:
         print("No Govee devices found.")
         return
 
-    green_color = (0, 255, 0)  # RGB values for green
-
-    # Set color and brightness on each found device
     for device in devices:
         try:
             async with BleakClient(device.address) as client:
                 print(f"Connected to {device.name}")
 
-                # Send all ALL_GREEN_COMMANDS sequentially
-                for i, command in enumerate(ALL_GREEN_COMMANDS, 1):
-                    print(f"Sending ALL_GREEN command {i} of {len(ALL_GREEN_COMMANDS)}")
-                    await client.write_gatt_char(WRITE_CHAR_UUID, bytes.fromhex(command), response=True)
-                await asyncio.sleep(3)
-                print("Setting color to purple")
-                await set_light_color(client, green_color)
+                # Listen for changes in the "tips" collection
+                tips_ref = db.collection('tips')
+                query = tips_ref.where('done', '==', True)
+
+                # Get the current event loop
+                loop = asyncio.get_running_loop()
+
+                # Callback function to handle document changes
+                def on_snapshot(doc_snapshot, changes, read_time):
+                    for doc in doc_snapshot:
+                        print(f'Tip document {doc.id} has "done" set to True')
+                        asyncio.run_coroutine_threadsafe(execute_commands_and_set_color(client), loop)
+
+                # Start listening for changes
+                query_watch = query.on_snapshot(on_snapshot)
 
                 # Send keep-alive packets every second
                 print("Sending keep-alive packets...")
@@ -74,7 +101,7 @@ async def main():
                     await client.write_gatt_char(WRITE_CHAR_UUID, bytes.fromhex("AA01000000000000000000000000000000000015"), response=True)
                     await asyncio.sleep(1)
 
-        except Exception as e:  
+        except Exception as e:
             print(f"Error controlling device {device.address}: {e}")
 
 if __name__ == "__main__":
