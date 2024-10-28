@@ -18,7 +18,7 @@ ALL_GREEN_COMMANDS = [
 ]
 
 async def find_govee_devices():
-    print("Scanning for Govee H6199 devices...")
+    print("Scanning for Govee devices...")
     devices = await BleakScanner.discover()
     govee_devices = []
     for d in devices:
