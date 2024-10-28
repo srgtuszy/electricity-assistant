@@ -267,15 +267,32 @@
         }
 
         function addRandomRooms(count) {
-            for (var i = 0; i < count; i++) {
+            // Create 45 occupied rooms
+            for (var i = 0; i < 45; i++) {
                 var room = {
-                    isOccupied: false,
+                    isOccupied: true,
                     roomNumber: i + 1,
-                    lastName: getRandomLastName()
+                    lastName: getRandomLastName()  // Random last name for occupied rooms
                 };
                 db.collection('rooms').add(room)
                 .then(function(docRef) {
-                    console.log('Room added with ID: ', docRef.id);
+                    console.log('Occupied room added with ID: ', docRef.id);
+                })
+                .catch(function(error) {
+                    console.error('Error adding room: ', error);
+                });
+            }
+
+            // Create 5 vacant rooms
+            for (var i = 45; i < 50; i++) {
+                var room = {
+                    isOccupied: false,
+                    roomNumber: i + 1,
+                    lastName: ''  // Empty last name for vacant rooms
+                };
+                db.collection('rooms').add(room)
+                .then(function(docRef) {
+                    console.log('Vacant room added with ID: ', docRef.id);
                 })
                 .catch(function(error) {
                     console.error('Error adding room: ', error);
