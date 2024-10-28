@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,7 @@ import { Line, LineChart, ResponsiveContainer } from "recharts"
 import { ChartContainer } from "@/components/ui/chart"
 import { collection, doc, onSnapshot, query, where, getDocs } from "firebase/firestore"
 import { firestore } from "../lib/firestore"
+import debounce from "lodash/debounce"
 
 // Tiny line chart component
 const TinyLineChart = ({ data, color }: { data: number[], color: string }) => (
@@ -21,17 +22,15 @@ const TinyLineChart = ({ data, color }: { data: number[], color: string }) => (
     }}
     className="h-8 w-20"
   >
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data.map((value, index) => ({ value, index }))}>
-        <Line
-          type="monotone"
-          dataKey="value"
-          stroke={`hsl(var(--${color}))`}
-          strokeWidth={2}
-          dot={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <LineChart width={80} height={32} data={data.map((value, index) => ({ value, index: index + 1 }))}>
+      <Line
+        type="monotone"
+        dataKey="value"
+        stroke={`hsl(var(--${color}))`}
+        strokeWidth={2}
+        dot={false}
+      />
+    </LineChart>
   </ChartContainer>
 )
 
@@ -70,7 +69,15 @@ export function HotelDashboard() {
                 newData[roomIndex] = updatedRoom
                 return newData
               }
-              return prevData
+              return [...prevData, {
+                number: roomData.roomNumber,
+                occupied: roomData.isOccupied,
+                lastName: roomData.lastName,
+                energy: Math.floor(electricityData[0]?.value || 0),
+                hourlyEnergy: electricityData.map((data) => Math.floor(data.value)),
+                water: 0,
+                hourlyWater: [],
+              }]
             })
           }
         )
@@ -92,36 +99,37 @@ export function HotelDashboard() {
                 newData[roomIndex] = updatedRoom
                 return newData
               }
-              return prevData
+              return [...prevData, {
+                number: roomData.roomNumber,
+                occupied: roomData.isOccupied,
+                lastName: roomData.lastName,
+                energy: 0,
+                hourlyEnergy: [],
+                water: Math.floor(waterData[0]?.value || 0),
+                hourlyWater: waterData.map((data) => Math.floor(data.value)),
+              }]
             })
           }
         )
 
         return {
-          number: roomData.roomNumber,
-          occupied: roomData.isOccupied,
-          lastName: roomData.lastName,
-          energy: 0,
-          water: 0,
-          hourlyEnergy: [],
-          hourlyWater: [],
-          electricityUnsubscribe,
-          waterUnsubscribe,
+          unsubscribe: () => {
+            electricityUnsubscribe()
+            waterUnsubscribe()
+          },
         }
       })
 
-      Promise.all(roomDataPromises).then((data) => {
-        setRoomData(data)
+      Promise.all(roomDataPromises).then((unsubscribes) => {
         setIsLoading(false)
+        return () => {
+          unsubscribes.forEach((unsubscribe) => unsubscribe.unsubscribe())
+        }
       })
     })
 
     return () => {
       unsubscribe()
-      roomData.forEach((room) => {
-        room.electricityUnsubscribe()
-        room.waterUnsubscribe()
-      })
     }
   }, [])
 
@@ -130,12 +138,22 @@ export function HotelDashboard() {
     const totalRooms = roomData.length
     const occupiedRooms = roomData.filter((room) => room.occupied).length
     const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0
-    const totalWaterUsage = Math.floor(roomData.reduce((sum, room) => sum + (room.water || 0), 0))
 
-    setHeaderData([
-      { title: "Total Rooms", value: totalRooms.toString(), icon: BarChart },
-      { title: "Occupancy Rate", value: `${occupancyRate}%`, icon: Battery },
-      { title: "Water Usage", value: `${totalWaterUsage}L`, icon: Droplet },
+    setHeaderData((prevHeaderData) => [
+      { ...prevHeaderData[0], value: totalRooms.toString() },
+      { ...prevHeaderData[1], value: `${occupancyRate}%` },
+      prevHeaderData[2],
+    ])
+  }, [roomData])
+
+  // Update water usage in header data whenever roomData changes
+  useEffect(() => {
+    const totalWaterUsage = roomData.reduce((sum, room) => sum + (room.water || 0), 0)
+
+    setHeaderData((prevHeaderData) => [
+      prevHeaderData[0],
+      prevHeaderData[1],
+      { ...prevHeaderData[2], value: `${Math.floor(totalWaterUsage)}L` },
     ])
   }, [roomData])
 
