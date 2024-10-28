@@ -69,3 +69,29 @@ class GoveePacket:
         command.append(xor_checksum)
 
         return command
+    
+    @staticmethod
+    def create_keep_alive_packet():
+        command = bytearray([
+            0xAA,        # Command prefix for keep alive
+            0x01,        # Command to keep alive
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0x00,        # Fixed byte
+            0xAB         # Fixed byte
+        ])
+
+        return command

@@ -68,7 +68,11 @@ async def main():
                 print("Setting color to purple")
                 await set_light_color(client, green_color)
 
-                print(f"Finished updating {device.name}\n")
+                # Send keep-alive packets every second
+                print("Sending keep-alive packets...")
+                while True:
+                    await client.write_gatt_char(WRITE_CHAR_UUID, bytes.fromhex("AA01000000000000000000000000000000000015"), response=True)
+                    await asyncio.sleep(1)
 
         except Exception as e:  
             print(f"Error controlling device {device.address}: {e}")
