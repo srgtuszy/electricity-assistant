@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Green Go</title>
+    <!-- Include Material Design Lite CSS -->
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <!-- Include Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Include custom styles -->
+    <style>
+        .page-content {
+            padding: 20px;
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+        .demo-card-wide.mdl-card {
+            width: 100%;
+        }
+        .demo-card-wide > .mdl-card__title {
+            position: relative;
+            color: #fff;
+            height: 176px;
+            background-position: center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mdl-card__title-text {
+            position: relative;
+            z-index: 1;
+            font-size: 24px;
+            font-weight: 500;
+            margin: 0;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+        }
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .cards-container > .mdl-card {
+            flex: 1 1 calc(33% - 20px);
+            min-width: 250px;
+        }
+        /* Optional: Add an overlay to darken the background images for better text visibility */
+        .demo-card-wide > .mdl-card__title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); /* Adjust opacity as needed */
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- MDL Layout -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <!-- Header -->
+        <header class="mdl-layout__header mdl-color--primary">
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title">Green Go</span>
+                <div class="mdl-layout-spacer"></div>
+            </div>
+        </header>
+        <!-- Content -->
+        <main class="mdl-layout__content">
+            <div class="page-content">
+                <!-- Introduce your project -->
+                <section>
+                    <h2>Welcome to Green Go</h2>
+                    <p>
+                        Explore our suite of tools designed to promote eco-friendly practices.
+                    </p>
+                </section>
+                <!-- Cards -->
+                <section class="cards-container">
+                    <!-- Emulator Card -->
+                    <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                        <div class="mdl-card__title" style="background-image: url('https://source.unsplash.com/featured/?environment');">
+                            <h2 class="mdl-card__title-text">Digital Twin</h2>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                            Our Lyf digital property control panel.
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <a href="https://green-go-emulator.web.app/" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Control Digital Twin
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Hotel Dashboard Card -->
+                    <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                        <div class="mdl-card__title" style="background-image: url('https://source.unsplash.com/featured/?hotel');">
+                            <h2 class="mdl-card__title-text">Hotel Dashboard</h2>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                            Our realtime property dashboard.
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <a href="https://lyf-dashboard.web.app/" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Visit Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Mobile App Card -->
+                    <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                        <div class="mdl-card__title" style="background-image: url('https://source.unsplash.com/featured/?mobile');">
+                            <h2 class="mdl-card__title-text">Mobile App</h2>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                            Our habit-building guest experience app.
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <a href="https://green-go-mobile.web.app/" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Visit Guest App
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <!-- Include MDL JavaScript -->
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</body>
+</html>
