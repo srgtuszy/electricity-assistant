@@ -64,45 +64,57 @@ async def main():
         return
 
     # Initialize Firebase app and Firestore client
-    cred = credentials.Certificate(service_account_path)
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
+    while True:
+        try:
+            cred = credentials.Certificate(service_account_path)
+            firebase_admin.initialize_app(cred)
+            db = firestore.client()
+            break
+        except Exception as e:
+            print(f"Error initializing Firebase: {e}. Retrying in 3 seconds...")
+            await asyncio.sleep(3)
 
     # Find devices
-    devices = await find_govee_devices()
-    if not devices:
-        print("No Govee devices found.")
-        return
+    while True:
+        devices = await find_govee_devices()
+        if devices:
+            break
+        print("No Govee devices found. Retrying in 3 seconds...")
+        await asyncio.sleep(3)
 
     for device in devices:
-        try:
-            async with BleakClient(device.address) as client:
-                print(f"Connected to {device.name}")
+        while True:
+            try:
+                async with BleakClient(device.address) as client:
+                    print(f"Connected to {device.name}")
 
-                # Listen for changes in the "tips" collection
-                tips_ref = db.collection('tips')
-                query = tips_ref.where('done', '==', True)
+                    # Listen for changes in the "tips" collection
+                    tips_ref = db.collection('tips')
+                    query = tips_ref.where('done', '==', True)
 
-                # Get the current event loop
-                loop = asyncio.get_running_loop()
+                    # Get the current event loop
+                    loop = asyncio.get_running_loop()
 
-                # Callback function to handle document changes
-                def on_snapshot(doc_snapshot, changes, read_time):
-                    for doc in doc_snapshot:
-                        print(f'Tip document {doc.id} has "done" set to True')
-                        asyncio.run_coroutine_threadsafe(execute_commands_and_set_color(client), loop)
+                    # Callback function to handle document changes
+                    def on_snapshot(doc_snapshot, changes, read_time):
+                        for doc in doc_snapshot:
+                            print(f'Tip document {doc.id} has "done" set to True')
+                            asyncio.run_coroutine_threadsafe(execute_commands_and_set_color(client), loop)
 
-                # Start listening for changes
-                query_watch = query.on_snapshot(on_snapshot)
+                    # Start listening for changes
+                    query_watch = query.on_snapshot(on_snapshot)
 
-                # Send keep-alive packets every second
-                print("Sending keep-alive packets...")
-                while True:
-                    await client.write_gatt_char(WRITE_CHAR_UUID, bytes.fromhex("AA01000000000000000000000000000000000015"), response=True)
-                    await asyncio.sleep(1)
+                    # Send keep-alive packets every second
+                    print("Sending keep-alive packets...")
+                    while True:
+                        await client.write_gatt_char(WRITE_CHAR_UUID, bytes.fromhex("AA01000000000000000000000000000000000015"), response=True)
+                        await asyncio.sleep(1)
 
-        except Exception as e:
-            print(f"Error controlling device {device.address}: {e}")
+            except Exception as e:
+                print(f"Error controlling device {device.address}: {e}. Retrying in 3 seconds...")
+                await asyncio.sleep(3)
+            else:
+                break
 
 if __name__ == "__main__":
     asyncio.run(main())
