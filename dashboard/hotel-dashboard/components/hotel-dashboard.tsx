@@ -73,7 +73,7 @@ export function HotelDashboard() {
                 number: roomData.roomNumber,
                 occupied: roomData.isOccupied,
                 lastName: roomData.lastName,
-                energy: Math.floor(electricityData[0]?.value || 0),
+                energy: Math.floor(electricityData[electricityData.length - 1]?.value || 0),
                 hourlyEnergy: electricityData.map((data) => Math.floor(data.value)),
                 water: 0,
                 hourlyWater: [],
@@ -92,7 +92,7 @@ export function HotelDashboard() {
               if (roomIndex !== -1) {
                 const updatedRoom = {
                   ...prevData[roomIndex],
-                  water: Math.floor(waterData[0]?.value || 0),
+                  water: Math.floor(waterData[waterData.length - 1]?.value || 0),
                   hourlyWater: waterData.map((data) => Math.floor(data.value)),
                 }
                 const newData = [...prevData]
@@ -209,7 +209,7 @@ export function HotelDashboard() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span>{room?.energy || 0} kWh</span>
+                            <span>{room?.energy || 0} W</span>
                             <TinyLineChart data={room?.hourlyEnergy || []} color="chart-1" />
                           </div>
                         </TableCell>
