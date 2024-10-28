@@ -20,8 +20,13 @@ const schema = {
         description: "The tip value",
         nullable: false,
       },
+      roomNumber: {
+        type: SchemaType.INTEGER,
+        description: "The room number the tip is for",
+        nullable: false,
+      },
     },
-    required: ["tip"],
+    required: ["tip", "roomNumber"],
   },
 };
 
@@ -37,7 +42,10 @@ onInit(() => {
   });
 });
 
-exports.triggerGenerateTips = onCall({cors: true}, async (data, context) => {
+exports.triggerGenerateTips = onCall({
+  cors: true,
+  timeoutSeconds: 540 // Extend the timeout to 9 minutes (540 seconds)
+}, async (data, context) => {
   console.log("Generating tips");
   const tips = await generateTips();
   const tipsCollection = db.collection("tips");
@@ -50,12 +58,14 @@ exports.triggerGenerateTips = onCall({cors: true}, async (data, context) => {
 
 async function generateTips() {
   console.log('Generating tips using Gemini...');  
-  const table = await collectionToTable(db.collection("electricity"));
+  const table = await allRoomMeasurementsToTable();
   console.log(table);
   const prompt = `
-  Given the following electricity measurements: ${table}. The kwh means kilowatt hours and the date is the date of the measurement.
+  Given the following electricity and water measurements: ${table}. The unit for electricity samples is Watts and for water samples is Liters.
   Please provide several tips on how the user can increase sustainability. The tips should be concise and actionable. Each tip should refer to concrete
-  measurements that the user can take to reduce their electricity consumption. Reference those measurements in the tips. Mention if the energy usage is too high or too low.`;
+  measurements that the user can take to reduce their electricity consumption. Reference those measurements in the tips. Mention if the energy usage is too high or too low.
+  The tips should be individual for every room number mentioned in the measurements.
+  `;
   try {
     const result = await model.generateContent(prompt);
     const generatedText = result.response.text();
@@ -67,6 +77,36 @@ async function generateTips() {
     
     return [];
   }
+}
+
+async function roomMeasurementsToTable(roomId) {
+  const roomRef = db.collection('rooms').doc(roomId);
+  const measurementsSnapshot = await roomRef.collection('measurements').get();
+  
+  let table = '';
+  
+  measurementsSnapshot.forEach((doc) => {
+    const measurement = doc.data();
+    table += `date: ${measurement.date.toDate().toLocaleString('en-US', { timeZone: 'UTC' })}\n`;
+    table += `type: "${measurement.type}"\n`;
+    table += `value: ${measurement.value}\n\n`;
+  });
+  
+  return table;
+}
+
+async function allRoomMeasurementsToTable() {
+  const roomsSnapshot = await db.collection('rooms').get();
+  
+  let allTables = '';
+  
+  for (const roomDoc of roomsSnapshot.docs) {
+    const roomId = roomDoc.id;
+    const roomTable = await roomMeasurementsToTable(roomId);
+    allTables += `Room Number: ${roomDoc.data().roomNumber}\n${roomTable}\n`;
+  }
+  
+  return allTables;
 }
 
 async function collectionToTable(collectionRef) {
