@@ -210,13 +210,13 @@ export function HotelDashboard() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <span>{room?.energy || 0} W</span>
-                            <TinyLineChart data={room?.hourlyEnergy || []} color="chart-1" />
+                            <TinyLineChart data={room?.hourlyEnergy.slice(-10) || []} color="chart-1" />
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <span>{room?.water || 0} L</span>
-                            <TinyLineChart data={room?.hourlyWater || []} color="chart-2" />
+                            <TinyLineChart data={room?.hourlyWater.slice(-10) || []} color="chart-2" />
                           </div>
                         </TableCell>
                       </TableRow>

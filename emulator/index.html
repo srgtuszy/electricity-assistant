@@ -81,6 +81,12 @@
                     <button id="emulateButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
                         Start Emulating
                     </button>
+                    <button id="highUsageButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                        High Footprint
+                    </button>
+                    <button id="lowUsageButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                        Low Footprint
+                    </button>
                     <button id="clearButton" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
                         Clear Measurements
                     </button>
@@ -135,6 +141,10 @@
         var clearButton = document.getElementById('clearButton');
         var spinner = document.querySelector('.spinner');
         var entityList = document.getElementById('entityList');
+        var highUsageButton = document.getElementById('highUsageButton');
+        var lowUsageButton = document.getElementById('lowUsageButton');
+        var currentUsageMode = 'normal'; // Can be 'normal', 'high', or 'low'
+
         // Enable or disable functions emulator based on checkbox state
         document.getElementById('emulator-checkbox').addEventListener('change', function() {
             if (this.checked) {
@@ -160,8 +170,30 @@
             clearMeasurements();
         });
 
+        highUsageButton.addEventListener('click', function() {
+            currentUsageMode = currentUsageMode === 'high' ? 'normal' : 'high';
+            highUsageButton.classList.toggle('mdl-button--accent');
+            lowUsageButton.classList.remove('mdl-button--accent');
+            console.log('Usage mode:', currentUsageMode);
+        });
+
+        lowUsageButton.addEventListener('click', function() {
+            currentUsageMode = currentUsageMode === 'low' ? 'normal' : 'low';
+            lowUsageButton.classList.toggle('mdl-button--accent');
+            highUsageButton.classList.remove('mdl-button--accent');
+            console.log('Usage mode:', currentUsageMode);
+        });
+
         function getRandomValue(min, max) {
-            return Math.random() * (max - min) + min;
+            let value = Math.random() * (max - min) + min;
+            
+            if (currentUsageMode === 'high') {
+                value *= 2; // Double the values for high usage
+            } else if (currentUsageMode === 'low') {
+                value *= 0.5; // Half the values for low usage
+            }
+            
+            return value;
         }
 
         function startEmulating() {
@@ -288,7 +320,7 @@
                 var room = {
                     isOccupied: false,
                     roomNumber: i + 1,
-                    lastName: ''  // Empty last name for vacant rooms
+                    lastName: ''
                 };
                 db.collection('rooms').add(room)
                 .then(function(docRef) {
