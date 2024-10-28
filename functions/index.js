@@ -44,7 +44,7 @@ onInit(() => {
 
 exports.triggerGenerateTips = onCall({
   cors: true,
-  timeoutSeconds: 540 // Extend the timeout to 9 minutes (540 seconds)
+  timeoutSeconds: 1000
 }, async (data, context) => {
   console.log("Generating tips");
   const tips = await generateTips();
@@ -63,7 +63,8 @@ async function generateTips() {
   const prompt = `
   Given the following electricity and water measurements: ${table}. The unit for electricity samples is Watts and for water samples is Liters.
   Please provide several tips on how the user can increase sustainability. The tips should be concise and actionable. Each tip should refer to concrete
-  measurements that the user can take to reduce their electricity consumption. Reference those measurements in the tips. Mention if the energy usage is too high or too low.
+  measurements that the user can take to reduce their electricity consumption and should be expressed as a specific action user can partake to reduce their carbon footprint. 
+  Avoid using non-actionable statements. Reference those measurements in the tips. Mention if the energy usage is too high or too low.
   The tips should be individual for every room number mentioned in the measurements.
   `;
   try {
