@@ -1,0 +1,5 @@
+# LED controller
+
+This part runs on raspberry pi (ideally) attached to or in the vicinity of the LED strip. Whenever a user completes a challenge and makes this planet a more sustainable place, this program will light up to celebrate.
+
+The program requires a firebase service account to be set via environment variable under `FIREBASE_SERVICE_ACCOUNT_PATH` key. It's expected that an active internet connection is present in order to react to changes from firestore.
